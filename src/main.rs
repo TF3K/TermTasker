@@ -15,7 +15,6 @@ use owo_colors::{
         Yellow,
         Aqua,
         White,
-        Magenta,
     }
 };
 use chrono::NaiveDate;
@@ -89,10 +88,11 @@ pub struct Task{
     description:    String,
     due_date:       NaiveDate,
     status:         Status,
+    assignees:       Vec<String>,
 }
 
 impl Task{
-    fn new(id:String, priority:String, title:String, description:String, due_date:String) -> Task{
+    pub fn new(id:String, priority:String, title:String, description:String, due_date:String, assignees: Vec<String>) -> Task{
         let parsed_due_date = NaiveDate::parse_from_str(due_date.as_str(),"%Y-%m-%d").expect("Error Parsing Date");
 
         Task{
@@ -103,6 +103,7 @@ impl Task{
             description:    description,
             due_date:       parsed_due_date,
             status:         Status::NotCompleted,
+            assignees:      assignees,
         }
     } 
 }
@@ -130,13 +131,13 @@ pub fn clear_screen(){
     }
 }
 
-fn prompt_user(message: &str) -> String {
+pub fn prompt_user(message: &str) -> String {
     println!("{}", message);
     io::stdout().flush().unwrap();
     read_input()
 }
 
-fn main() {
+pub fn main() {
 
     let exe_path = env::current_exe().expect("Unable to get current executable path");
     let mut dir_path: PathBuf = exe_path.parent().expect("Failed to get parent directory of executable").to_path_buf();
@@ -157,23 +158,22 @@ fn main() {
         .create(true)
         .open(&dir_path)
         .expect("Unable to create file");
-    
+
     let logo = r#"
-███╗   ███╗ ██████╗ ██████╗ ████████╗ █████╗ ██╗         ██████╗ ███████╗███╗   ███╗██╗███╗   ██╗██████╗ ███████╗██████╗     ██╗   ██╗ ██╗    ██████╗ ██╗
-████╗ ████║██╔═══██╗██╔══██╗╚══██╔══╝██╔══██╗██║         ██╔══██╗██╔════╝████╗ ████║██║████╗  ██║██╔══██╗██╔════╝██╔══██╗    ██║   ██║███║   ██╔═████╗██║
-██╔████╔██║██║   ██║██████╔╝   ██║   ███████║██║         ██████╔╝█████╗  ██╔████╔██║██║██╔██╗ ██║██║  ██║█████╗  ██████╔╝    ██║   ██║╚██║   ██║██╔██║██████╗
-██║╚██╔╝██║██║   ██║██╔══██╗   ██║   ██╔══██║██║         ██╔══██╗██╔══╝  ██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗    ╚██╗ ██╔╝ ██║   ████╔╝██║██╔══██╗
-██║ ╚═╝ ██║╚██████╔╝██║  ██║   ██║   ██║  ██║███████╗    ██║  ██║███████╗██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗██║  ██║     ╚████╔╝  ██║██╗╚██████╔╝██████╔╝
-╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝      ╚═══╝   ╚═╝╚═╝ ╚═════╝ ╚═════╝ 
+░█▄█░█▀█░█▀▄░▀█▀░█▀█░█░░░░░█▀▄░█▀▀░█▄█░▀█▀░█▀█░█▀▄░█▀▀░█▀▄░░░█░█░▀█░░░░░▀▀▄░█░░
+░█░█░█░█░█▀▄░░█░░█▀█░█░░░░░█▀▄░█▀▀░█░█░░█░░█░█░█░█░█▀▀░█▀▄░░░▀▄▀░░█░░░░░▄▀░░█▀▄
+░▀░▀░▀▀▀░▀░▀░░▀░░▀░▀░▀▀▀░░░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░░░░▀░░▀▀▀░▀░░▀▀▀░▀▀░
 "#;
 
-    clear_screen();
+    //clear_screen();
     println!("{}", logo.bold().truecolor(176,0,0));
     println!("1. Add Task");
     println!("2. List Tasks");
     println!("3. Mark task as completed");
     println!("4. Remove task");
-    println!("5. Exit");
+    println!("5. Edit a task");
+    println!("6. Search for a task");
+    println!("7. Exit");
     println!(); 
     loop {
         thread::sleep(Duration::from_secs(1));
@@ -195,7 +195,18 @@ fn main() {
                 let task_desc = prompt_user("Description: ");
                 let task_due_date = prompt_user("Due Date (YYYY-MM-DD Format): ");
 
-                let ntask = Task::new(task_id, task_prio, task_title, task_desc, task_due_date);
+                let mut assignees = Vec::new();
+                println!("Enter at least 1 assignee name (type done to countinue): ");
+                loop{
+                    let assignee = read_input();
+                    if assignee.to_lowercase() != "done"{
+                        assignees.push(assignee);
+                    } else if assignee.to_lowercase() == "done"{
+                        break;
+                    }
+                }
+
+                let ntask = Task::new(task_id, task_prio, task_title, task_desc, task_due_date, assignees);
 
                 let mut contents = String::new();
                 if let Err(err) = file.read_to_string(&mut contents) {
@@ -268,7 +279,11 @@ fn main() {
                             }
 
                             if let Some(status) = task_obj.get("status") {
-                                println!("{}: {}",r#"Status"#.underline().bold().fg::<Aqua>(), status.bold().fg::<Magenta>());
+                                println!("{}: {}",r#"Status"#.underline().bold().fg::<Aqua>(), status.bold());
+                            }
+
+                            if let Some(assignees) = task_obj.get("assignees") {
+                                println!("{}: {}",r#"Assignees"#.underline().bold().fg::<Aqua>(), assignees.to_string().trim_matches(|br| br == '[' || br == ']'));
                             }
 
                             println!("{}","-".repeat(110));
@@ -372,6 +387,113 @@ fn main() {
                 }
             }
             5 => {
+                file.seek(std::io::SeekFrom::Start(0)).expect("Unable to seek to start of the file");
+
+                println!("Enter the ID of the task you wish to edit: ");
+                let init_id: u32 = read_input().trim().parse().expect("Unable to parse to int");
+
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).expect("Unable to read file");
+
+                let mut tasks: Value = serde_json::from_str(&contents).expect("Unable to deserialize");
+
+                if let Some(task) = tasks.as_array_mut().and_then(|arr| {
+                    arr.iter_mut().find(|t| t.get("id").and_then(|id| id.as_u64()) == Some(init_id.into()))
+                }) {
+                    println!("Enter the field you wish to edit (id, priority, title, description, due_date, status, assignees): ");
+                    let field = read_input();
+
+                    match field.as_str() {
+                        "id" => {
+                            println!("Enter the new ID: ");
+                            let new_id: i32 = read_input().trim().parse().expect("Unable to parse to int");
+                            task.as_object_mut().unwrap().insert("id".to_string(), new_id.into());
+                        }
+                        "priority" => {
+                            println!("Enter the new priority (Critical, High, Medium, Low): ");
+                            let new_priority = read_input();
+                            task.as_object_mut().unwrap().insert("priority".to_string(), new_priority.into());
+                        }
+                        "title" => {
+                            println!("Enter the new title: ");
+                            let new_title = read_input();
+                            task.as_object_mut().unwrap().insert("title".to_string(), new_title.into());
+                        }
+                        "description" => {
+                            println!("Enter the new description: ");
+                            let new_description = read_input();
+                            task.as_object_mut().unwrap().insert("description".to_string(), new_description.into());
+                        }
+                        "due_date" => {
+                            println!("Enter the new due date (YYYY-MM-DD Format): ");
+                            let new_due_date = read_input();
+                            task.as_object_mut().unwrap().insert("due_date".to_string(), new_due_date.into());
+                        }
+                        "status" => {
+                            println!("Enter the new status (Completed, NotCompleted): ");
+                            let new_status = read_input();
+                            task.as_object_mut().unwrap().insert("status".to_string(), new_status.into());
+                        }
+                        "assignees" => {
+                            println!("Enter the new assignees (separated by commas): ");
+                            let new_assignees = read_input();
+                            task.as_object_mut().unwrap().insert("assignees".to_string(), new_assignees.into());
+                        }
+                        _ => {
+                            println!("Invalid field");
+                        }
+                    }
+                    let updated_json = serde_json::to_string_pretty(&tasks).expect("Unable to serialize");
+                    file.seek(std::io::SeekFrom::Start(0)).expect("Unable to seek to start of the file");
+                    file.set_len(0).expect("Unable to truncate file");
+                    file.write_all(updated_json.as_bytes()).expect("Unable to write to file");
+                } else {
+                    println!("Task with ID: {} not found", init_id);
+                }
+            }
+            6 => {
+                file.seek(std::io::SeekFrom::Start(0)).expect("Unable to seek to start of the file");
+
+                println!("Enter the field you wish to search by (id, priority, title, description, due_date, status, assignees): ");
+                let field = read_input();
+
+                println!("Enter the value you wish to search for: ");
+                let value = read_input();
+
+                let mut contents = String::new();
+                file.read_to_string(&mut contents).expect("Unable to read file");
+
+                let tasks: Value = serde_json::from_str(&contents).expect("Unable to deserialize");
+
+                let matching_tasks: Vec<&Value> = tasks.as_array().unwrap().iter().filter(|t| {
+                    if let Some(task) = t.as_object() {
+                        match field.as_str() {
+                            "id" => task.get("id").and_then(|id| id.as_u64()) == Some(value.parse().unwrap()),
+                            "priority" => task.get("priority").and_then(|priority| priority.as_str()) == Some(value.as_str()),
+                            "title" => task.get("title").and_then(|title| title.as_str()) == Some(value.as_str()),
+                            "description" => task.get("description").and_then(|description| description.as_str()) == Some(value.as_str()),
+                            "due_date" => task.get("due_date").and_then(|due_date| due_date.as_str()) == Some(value.as_str()),
+                            "status" => task.get("status").and_then(|status| status.as_str()) == Some(value.as_str()),
+                            "assignees" => task.get("assignees").and_then(|assignees| assignees.as_array()).map(|assignees| {
+                                assignees.iter().any(|a| a.as_str() == Some(value.as_str()))
+                            }).unwrap_or(false),
+                            _ => false,
+                        }
+                    } else {
+                        false
+                    }
+                }).collect();
+
+                if matching_tasks.is_empty() {
+                    println!("No tasks found with {} equal to {}", field, value);
+                } else {
+                    println!("{} tasks found with {} equal to {}", matching_tasks.len(), field, value);
+                    for task in matching_tasks {
+                        println!("{}", serde_json::to_string_pretty(task).expect("Unable to serialize"));
+                    }
+                }
+            }
+            7 => {
                 println!("{}",r#"Exiting..."#.bold().red());
                 let duration = Duration::from_secs(1);
                 thread::sleep(duration);
