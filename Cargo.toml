@@ -1,5 +1,5 @@
 [package]
-name = "mortal_reminder"
+name = "termtasker"
 version = "1.2.0"
 edition = "2021"
 metadata.stage = "beta"
