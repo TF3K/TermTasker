@@ -1,5 +1,5 @@
 
-# Mortal Reminder V1.0b
+# TermTask (formerly known as Mortal Reminder) V1.0b
 
 A lightweight to-do list CLI written in Rust allows users to easily add, list, mark and remove tasks, using Serde for JSON file storage for persistent data.
 ## Features
