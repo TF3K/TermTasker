@@ -38,14 +38,16 @@ On Windows:
 
 On Linux:
 ```bash
-    alias mr="/target/release/termtasker"
+    alias tt="/target/release/termtasker"
     or
-    alias mortalreminder="/target/release/termtasker"
+    alias termtasker="/target/release/termtasker"
 ```
 
 On Windows:
 ```cmd
-    doskey mr=target\release\termtasker.exe
+    doskey tt=target\release\termtasker.exe
+    or
+    doskey termtasker=target\release\termtasker.exe
 ```
 
 
