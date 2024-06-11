@@ -1,5 +1,5 @@
 
-# TermTask (formerly known as Mortal Reminder) V1.0b
+# TermTasker (formerly known as Mortal Reminder) V1.0b
 
 A lightweight to-do list CLI written in Rust allows users to easily add, list, mark and remove tasks, using Serde for JSON file storage for persistent data.
 ## Features
@@ -38,14 +38,14 @@ On Windows:
 
 On Linux:
 ```bash
-    alias mr="/target/release/mortal_reminder"
+    alias mr="/target/release/termtasker"
     or
-    alias mortalreminder="/target/release/mortal_reminder"
+    alias mortalreminder="/target/release/termtasker"
 ```
 
 On Windows:
 ```cmd
-    doskey mr=target\release\mortal_reminder.exe
+    doskey mr=target\release\termtasker.exe
 ```
 
 
