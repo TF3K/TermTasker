@@ -57,5 +57,3 @@ On Windows:
 - Add searching for tasks by ID/UUID
 - Optimize serialization/deserialization process
 - Implement a Ticketing system for intercommunication between the task issuer and task doer
-- 
-
